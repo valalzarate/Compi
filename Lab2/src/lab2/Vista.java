@@ -30,9 +30,11 @@ public class Vista extends javax.swing.JFrame {
     static ArrayList<String> cabezote = new ArrayList<String>();
     static ArrayList<String> cabezote2 = new ArrayList<String>();
     ArrayList<String> cuerpo = new ArrayList<String>();
+    ArrayList<String> terminales = new ArrayList<String>();
     static ArrayList<String> Siguiente = new ArrayList<String>();
     DefaultTableModel pk;
     DefaultTableModel pk1;
+    DefaultTableModel pk2;
     HashMap<String, Set<String>> producciones = new HashMap<String, Set<String>>();
     HashMap<String, Set<String>> primero = new HashMap<String, Set<String>>();
     HashMap<String, Set<String>> siguiente = new HashMap<String, Set<String>>();
@@ -105,7 +107,6 @@ public class Vista extends javax.swing.JFrame {
                         }
                     }
                     newfirst.get(key).addAll(temporalSet);
-//                    combine(newfirst.get(key), temporalSet);
                 }
             }
             if (!sonIguales(primero, newfirst)) {
@@ -125,6 +126,10 @@ public class Vista extends javax.swing.JFrame {
     }
 
     private void regla3() {
+        HashMap<String, Set<String>> newfollow = new HashMap<String, Set<String>>();
+        int invariable = 0;
+        do {
+        newfollow = (HashMap<String, Set<String>>) primero.clone();
         Set<String> prokeys = producciones.keySet();
         for (String prokey : prokeys) {
             for (String production : producciones.get(prokey)) {
@@ -132,7 +137,7 @@ public class Vista extends javax.swing.JFrame {
                 while (i >= 0) {
                     if (!esMinuscula(production.substring(i, i + 1))) {
                         siguiente.get(production.substring(i, i + 1)).addAll(siguiente.get(prokey));
-                        if (tieneEpsilon(primero.get(production.substring(i,i+1)))) {
+                        if (tieneEpsilon(primero.get(production.substring(i, i + 1)))) {
                             i--;
                         } else {
                             break;
@@ -143,13 +148,86 @@ public class Vista extends javax.swing.JFrame {
                 }
             }
         }
+        if (!sonIguales(siguiente, newfollow)) {
+                invariable = 0;
+            } else {
+                invariable++;
+            }
+        } while (invariable < 3);
+    }
+
+    public String Primero(String produccion) {
+        String devolucion = "";
+        for (int i = 0; i < produccion.length(); i++) {
+            if (esMinuscula(produccion.substring(i, i + 1))) {
+                return devolucion += produccion.substring(i, i + 1);
+            } else {
+                Set<String> prokeys = primero.keySet();
+                for (String prokey : prokeys) {
+                    if (produccion.substring(i, i + 1).equals(prokey)) {
+                        for (String string : primero.get(prokey)) {
+                            devolucion += string;
+                        }
+                        break;
+                    }
+                }
+                if (!devolucion.contains("&")) {
+                    break;
+                } else if(i+1 < produccion.length()) {
+                    devolucion = devolucion.replace("&", "");
+                }
+            }
+        }
+        return devolucion;
+    }
+
+    public void TablaM() {
+        pk2 = new DefaultTableModel();
+        String hp3[] = new String[terminales.size() + 1];
+        hp3[0] = "Terminales / No terminales ";
+        for (int i = 0; i < terminales.size(); i++) {
+            hp3[i + 1] = terminales.get(i);
+        }
+        pk2.setColumnIdentifiers(hp3);
+        TablaMt.setModel(pk2);
+        //Set<String> prokeys = producciones.keySet();
+        for (String prokey : cabezote) {
+            Object[] tabla = new Object[terminales.size() + 1];
+            tabla[0]=prokey;
+            System.out.println("prokey " + prokey);
+            for (String produ : producciones.get(prokey)) {
+                if (produ.equals("&")) {
+                    for (String string : siguiente.get(prokey)) {
+                        System.out.println(string + " epsilon");
+                        for (int i = 0; i < terminales.size(); i++) {
+                            if (string.equals(terminales.get(i))) {
+                                tabla[i + 1] = prokey + "->&";
+                                break;
+                            }
+                        }
+                    }
+                } else {
+                    String h = Primero(produ);
+                    System.out.println(h + "hhhhhhhhhhhhhhhhhhhhhhhhh ");
+                    for (int i = 0; i < h.length(); i++) {
+                        for (int j = 0; j < terminales.size(); j++) {
+                            if (h.substring(i, i + 1).equals(terminales.get(j))) {
+                                tabla[j + 1] = prokey + "->" + produ;
+                            }
+                        }
+                    }
+                }
+            }
+            pk2.addRow(tabla);
+        }
     }
 
     public void regla2() {
         Set<String> prokeys = producciones.keySet();
         for (String prokey : prokeys) {
+            System.out.println(prokey + " prokeys");
             for (String production : producciones.get(prokey)) {
-
+                System.out.println(production + " produccion");
                 int i = 0;
                 while (i < production.length() - 1) {
                     if (!esMinuscula(production.substring(i, i + 1))) {
@@ -157,7 +235,7 @@ public class Vista extends javax.swing.JFrame {
                         while (j < production.length()) {
                             Set<String> temp = new LinkedHashSet<String>();
                             if (!esMinuscula(production.substring(j, j + 1))) {
-                                temp.addAll(primero.get(production.charAt(j) + ""));
+                                temp.addAll(primero.get(production.substring(j, j + 1)));
                                 if (temp.contains("&")) {
                                     temp.remove("&");
                                     siguiente.get(production.substring(i, i + 1)).addAll(temp);
@@ -167,7 +245,8 @@ public class Vista extends javax.swing.JFrame {
                                     break;
                                 }
                             } else {
-                                temp.add(production.charAt(j) + "");
+                                System.out.println(production.substring(i, i + 1));
+                                temp.add(production.substring(j, j + 1));
                                 siguiente.get(production.substring(i, i + 1)).addAll(temp);
                                 break;
                             }
@@ -200,6 +279,9 @@ public class Vista extends javax.swing.JFrame {
         jScrollPane3 = new javax.swing.JScrollPane();
         TablaSiguiente = new javax.swing.JTable();
         jLabel4 = new javax.swing.JLabel();
+        jScrollPane4 = new javax.swing.JScrollPane();
+        TablaMt = new javax.swing.JTable();
+        jLabel5 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -244,13 +326,25 @@ public class Vista extends javax.swing.JFrame {
 
         jLabel4.setText("Siguiente: ");
 
+        TablaMt.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+
+            },
+            new String [] {
+
+            }
+        ));
+        jScrollPane4.setViewportView(TablaMt);
+
+        jLabel5.setText("Tabla M:");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jLabel1)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -259,19 +353,24 @@ public class Vista extends javax.swing.JFrame {
                         .addComponent(jButton1))
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 240, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jScrollPane1))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 240, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addGroup(layout.createSequentialGroup()
-                                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(87, 87, 87)
-                                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 240, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 289, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addGap(2, 2, 2)
                                 .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 202, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addGap(18, 18, 18)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel4)
                             .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 230, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                .addContainerGap(232, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jScrollPane4, javax.swing.GroupLayout.DEFAULT_SIZE, 545, Short.MAX_VALUE)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 245, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(0, 0, Short.MAX_VALUE))))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -282,16 +381,23 @@ public class Vista extends javax.swing.JFrame {
                     .addComponent(jLabel1)
                     .addComponent(jButton1))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel4))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 280, Short.MAX_VALUE)
-                    .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 280, Short.MAX_VALUE))
-                .addContainerGap(158, Short.MAX_VALUE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel4)
+                            .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                .addComponent(jScrollPane4, javax.swing.GroupLayout.DEFAULT_SIZE, 280, Short.MAX_VALUE)
+                                .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
+                            .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 320, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 280, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(118, Short.MAX_VALUE))
         );
 
         pack();
@@ -449,6 +555,32 @@ public class Vista extends javax.swing.JFrame {
                     }
 
                 }
+                for (String string : cuerpo) {
+                    String[] cuerpos = string.split(" ");
+                    for (String cuerpo1 : cuerpos) {
+                        System.out.println("cuerpooooooooooooo   " + cuerpo1);
+                        for (int i = 0; i < cuerpo1.length(); i++) {
+                            System.out.println(cuerpo1.substring(i, i+1));
+                            if (esMinuscula(cuerpo1.substring(i, i + 1)) && (!cuerpo1.substring(i, i+1).equals("&"))) {
+                                System.out.println("aja");
+                                boolean esta = false;
+                                for (int j = 0; j < terminales.size(); j++) {
+                                    if (cuerpo1.substring(i, i+1).equals(terminales.get(j))) {
+                                        esta= true;
+                                        break;
+                                    }
+                                }
+                                if (!esta) {
+                                    terminales.add(cuerpo1.substring(i, i + 1));
+                                }
+                            }
+                        }
+                    }
+                }
+                terminales.add("$");
+                for (String terminale : terminales) {
+                    System.out.println(terminale + "terminal ");
+                }
 
                 // imprimo a ver como queda
                 for (int i = 0; i < cabezote.size(); i++) {
@@ -485,6 +617,15 @@ public class Vista extends javax.swing.JFrame {
                     siguiente.put(prokey, new LinkedHashSet<>());
                 }
                 ComputeFirst();
+                System.out.println("Primerooooooooooooooooooooooooooo");
+                pk = new DefaultTableModel();
+                String hp[] = {"Cabezote", "Primero"};
+                pk.setColumnIdentifiers(hp);
+                TablaPrimero.setModel(pk);
+                primero.forEach((k, v) -> {
+                    pk.addRow(new Object[]{k, v});
+                });
+
                 computeFollow();
 //
 //                System.out.println("aquiiiiiiiiiiii empieza");
@@ -504,28 +645,22 @@ public class Vista extends javax.swing.JFrame {
 //                    }
 //                    Primero.add(primero);
 //                }
-                System.out.println("Primerooooooooooooooooooooooooooo");
-                pk = new DefaultTableModel();
-                String hp[] = {"Cabezote", "Primero"};
-                pk.setColumnIdentifiers(hp);
-                TablaPrimero.setModel(pk);
-                primero.forEach((k, v) -> {
-                    pk.addRow(new Object[]{k, v});
-                });
-                pk1= new DefaultTableModel();
-                String hp2[] = {"Cabezote","Siguiente"};
+
+                pk1 = new DefaultTableModel();
+                String hp2[] = {"Cabezote", "Siguiente"};
                 pk1.setColumnIdentifiers(hp2);
                 TablaSiguiente.setModel(pk1);
                 siguiente.forEach((k, v) -> {
                     pk1.addRow(new Object[]{k, v});
                 });
+                TablaM();
+
 //                for (int i = 0; i < Primero.size(); i++) {
 //                    pk.addRow(new Object[]{cabezote2.get(i), Primero.get(i)});
 //                }
 //                for (String string : Primero) {
 //                    System.out.println(string);
 //                }
-
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -569,6 +704,7 @@ public class Vista extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JTextField JRuta;
+    private javax.swing.JTable TablaMt;
     private javax.swing.JTable TablaPrimero;
     private javax.swing.JTable TablaSiguiente;
     private javax.swing.JButton jButton1;
@@ -576,9 +712,11 @@ public class Vista extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
+    private javax.swing.JScrollPane jScrollPane4;
     private javax.swing.JTextArea jTextArea1;
     // End of variables declaration//GEN-END:variables
 }
