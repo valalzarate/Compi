@@ -13,7 +13,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
+import java.util.Stack;
 import javax.swing.JFileChooser;
 import javax.swing.table.DefaultTableModel;
 
@@ -35,12 +37,17 @@ public class Vista extends javax.swing.JFrame {
     DefaultTableModel pk;
     DefaultTableModel pk1;
     DefaultTableModel pk2;
+    DefaultTableModel pk3;
     HashMap<String, Set<String>> producciones = new HashMap<String, Set<String>>();
     HashMap<String, Set<String>> primero = new HashMap<String, Set<String>>();
     HashMap<String, Set<String>> siguiente = new HashMap<String, Set<String>>();
 
     public Vista() {
         initComponents();
+        jLabel6.setVisible(false);
+        cadena.setVisible(false);
+        reconocerButton.setVisible(false);
+        TablaReconocer.setVisible(false);
     }
 
     public static boolean esMinuscula(String s) {
@@ -129,26 +136,26 @@ public class Vista extends javax.swing.JFrame {
         HashMap<String, Set<String>> newfollow = new HashMap<String, Set<String>>();
         int invariable = 0;
         do {
-        newfollow = (HashMap<String, Set<String>>) primero.clone();
-        Set<String> prokeys = producciones.keySet();
-        for (String prokey : prokeys) {
-            for (String production : producciones.get(prokey)) {
-                int i = production.length() - 1;
-                while (i >= 0) {
-                    if (!esMinuscula(production.substring(i, i + 1))) {
-                        siguiente.get(production.substring(i, i + 1)).addAll(siguiente.get(prokey));
-                        if (tieneEpsilon(primero.get(production.substring(i, i + 1)))) {
-                            i--;
+            newfollow = (HashMap<String, Set<String>>) primero.clone();
+            Set<String> prokeys = producciones.keySet();
+            for (String prokey : prokeys) {
+                for (String production : producciones.get(prokey)) {
+                    int i = production.length() - 1;
+                    while (i >= 0) {
+                        if (!esMinuscula(production.substring(i, i + 1))) {
+                            siguiente.get(production.substring(i, i + 1)).addAll(siguiente.get(prokey));
+                            if (tieneEpsilon(primero.get(production.substring(i, i + 1)))) {
+                                i--;
+                            } else {
+                                break;
+                            }
                         } else {
                             break;
                         }
-                    } else {
-                        break;
                     }
                 }
             }
-        }
-        if (!sonIguales(siguiente, newfollow)) {
+            if (!sonIguales(siguiente, newfollow)) {
                 invariable = 0;
             } else {
                 invariable++;
@@ -173,7 +180,7 @@ public class Vista extends javax.swing.JFrame {
                 }
                 if (!devolucion.contains("&")) {
                     break;
-                } else if(i+1 < produccion.length()) {
+                } else if (i + 1 < produccion.length()) {
                     devolucion = devolucion.replace("&", "");
                 }
             }
@@ -193,7 +200,7 @@ public class Vista extends javax.swing.JFrame {
         //Set<String> prokeys = producciones.keySet();
         for (String prokey : cabezote) {
             Object[] tabla = new Object[terminales.size() + 1];
-            tabla[0]=prokey;
+            tabla[0] = prokey;
             System.out.println("prokey " + prokey);
             for (String produ : producciones.get(prokey)) {
                 if (produ.equals("&")) {
@@ -282,6 +289,11 @@ public class Vista extends javax.swing.JFrame {
         jScrollPane4 = new javax.swing.JScrollPane();
         TablaMt = new javax.swing.JTable();
         jLabel5 = new javax.swing.JLabel();
+        jLabel6 = new javax.swing.JLabel();
+        cadena = new javax.swing.JTextField();
+        reconocerButton = new javax.swing.JButton();
+        jScrollPane5 = new javax.swing.JScrollPane();
+        TablaReconocer = new javax.swing.JTable();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -338,66 +350,103 @@ public class Vista extends javax.swing.JFrame {
 
         jLabel5.setText("Tabla M:");
 
+        jLabel6.setText("Cadena a reconocer:");
+
+        reconocerButton.setText("Reconocer");
+        reconocerButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                reconocerButtonActionPerformed(evt);
+            }
+        });
+
+        TablaReconocer.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null}
+            },
+            new String [] {
+                "Title 1", "Title 2", "Title 3", "Title 4"
+            }
+        ));
+        TablaReconocer.setCellSelectionEnabled(true);
+        jScrollPane5.setViewportView(TablaReconocer);
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                    .addComponent(jLabel2, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, 240, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, 273, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 240, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 202, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 230, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(jLabel4)))
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 57, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(36, 36, 36)
+                                .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 642, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addGap(27, 27, 27)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jScrollPane5, javax.swing.GroupLayout.PREFERRED_SIZE, 418, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(6, 6, 6)
+                                .addComponent(jLabel6)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(cadena, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(reconocerButton))))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jLabel1)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(JRuta, javax.swing.GroupLayout.PREFERRED_SIZE, 583, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jButton1))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 240, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jScrollPane1))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 240, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addGroup(layout.createSequentialGroup()
-                                .addGap(2, 2, 2)
-                                .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 202, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel4)
-                            .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 230, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane4, javax.swing.GroupLayout.DEFAULT_SIZE, 545, Short.MAX_VALUE)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 245, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 0, Short.MAX_VALUE))))
+                        .addComponent(jButton1)))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
+                .addContainerGap(21, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(JRuta, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel1)
                     .addComponent(jButton1))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel4)
+                    .addComponent(jLabel6)
+                    .addComponent(cadena, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(reconocerButton))
+                .addGap(1, 1, 1)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jScrollPane5, javax.swing.GroupLayout.PREFERRED_SIZE, 580, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel4)
-                            .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                .addComponent(jScrollPane4, javax.swing.GroupLayout.DEFAULT_SIZE, 280, Short.MAX_VALUE)
-                                .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
-                            .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 320, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 280, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(118, Short.MAX_VALUE))
+                            .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 280, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 280, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 280, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(18, 18, 18)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(0, 0, Short.MAX_VALUE)))))
+                .addGap(5, 5, 5))
         );
 
         pack();
@@ -430,6 +479,10 @@ public class Vista extends javax.swing.JFrame {
 
             // leo el archivo
             try {
+
+                jLabel6.setVisible(true);
+                cadena.setVisible(true);
+                reconocerButton.setVisible(true);
                 fr = new FileReader(archivo);
                 br = new BufferedReader(fr);
                 String linea;
@@ -560,13 +613,13 @@ public class Vista extends javax.swing.JFrame {
                     for (String cuerpo1 : cuerpos) {
                         System.out.println("cuerpooooooooooooo   " + cuerpo1);
                         for (int i = 0; i < cuerpo1.length(); i++) {
-                            System.out.println(cuerpo1.substring(i, i+1));
-                            if (esMinuscula(cuerpo1.substring(i, i + 1)) && (!cuerpo1.substring(i, i+1).equals("&"))) {
+                            System.out.println(cuerpo1.substring(i, i + 1));
+                            if (esMinuscula(cuerpo1.substring(i, i + 1)) && (!cuerpo1.substring(i, i + 1).equals("&"))) {
                                 System.out.println("aja");
                                 boolean esta = false;
                                 for (int j = 0; j < terminales.size(); j++) {
-                                    if (cuerpo1.substring(i, i+1).equals(terminales.get(j))) {
-                                        esta= true;
+                                    if (cuerpo1.substring(i, i + 1).equals(terminales.get(j))) {
+                                        esta = true;
                                         break;
                                     }
                                 }
@@ -592,25 +645,19 @@ public class Vista extends javax.swing.JFrame {
                     }
                     producciones.put(cabezote.get(i), conjunto);
                 }
-//                Collections.sort(cabezote);
-//                Collections.reverse(cabezote);
-//              Aqui los ordeno pa que quede bonito
-//                for (int i = 0; i < cabezote.size(); i++) {
-//                    System.out.println(cabezote.get(i));
-//                    String[] cuerpo = cabezote.get(i).split("->");
-//                    String[] cuerpos = cuerpo[1].split(" ");
-//                    for (int j = 0; j < cuerpos.length; j++) {
-//                        jTextArea1.append(cuerpo[0] + "->" + cuerpos[j]);
-//                        jTextArea1.append(System.getProperty("line.separator"));
-//                    }
-//
-//                }
-                producciones.forEach((k, v) -> {
-                    for (String string : v) {
-                        jTextArea1.append(k + "->" + string);
-                        jTextArea1.append(System.getProperty("line.separator"));
+
+                for (String cabezote : cabezote) {
+                    for (Map.Entry<String, Set<String>> entry : producciones.entrySet()) {
+                        if (entry.getKey().equals(cabezote)) {
+                            for (String string : entry.getValue()) {
+                                jTextArea1.append(entry.getKey() + "->" + string);
+                                jTextArea1.append(System.getProperty("line.separator"));
+                            }
+                            break;
+                        }
                     }
-                });
+                }
+
                 Set<String> prokeys = producciones.keySet();
                 for (String prokey : prokeys) {
                     primero.put(prokey, new LinkedHashSet<String>());
@@ -622,50 +669,150 @@ public class Vista extends javax.swing.JFrame {
                 String hp[] = {"Cabezote", "Primero"};
                 pk.setColumnIdentifiers(hp);
                 TablaPrimero.setModel(pk);
-                primero.forEach((k, v) -> {
-                    pk.addRow(new Object[]{k, v});
-                });
-
+                llenarTable(pk, primero);
                 computeFollow();
-//
-//                System.out.println("aquiiiiiiiiiiii empieza");
-//
-//                for (int i = 0; i < cabezote.size(); i++) {
-//                    String primero = "";
-//                    String[] cuerpo = cabezote.get(i).split("->");
-//                    String[] cuerpos = cuerpo[1].split(" ");
-//                    for (int j = 0; j < cuerpos.length; j++) {
-//                        System.out.println("aqui verifico " + cabezote2.get(i) + " -> " + cuerpos[j]);
-//                        String po = Primero(cuerpos[j]);
-//                        for (int k = 0; k < po.length(); k++) {
-//                            if (!primero.contains(po.substring(k, k + 1))) {
-//                                primero = primero + po.substring(k, k + 1);
-//                            }
-//                        }
-//                    }
-//                    Primero.add(primero);
-//                }
 
                 pk1 = new DefaultTableModel();
                 String hp2[] = {"Cabezote", "Siguiente"};
                 pk1.setColumnIdentifiers(hp2);
                 TablaSiguiente.setModel(pk1);
-                siguiente.forEach((k, v) -> {
-                    pk1.addRow(new Object[]{k, v});
-                });
+                llenarTable(pk1, siguiente);
                 TablaM();
 
-//                for (int i = 0; i < Primero.size(); i++) {
-//                    pk.addRow(new Object[]{cabezote2.get(i), Primero.get(i)});
-//                }
-//                for (String string : Primero) {
-//                    System.out.println(string);
-//                }
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
     }//GEN-LAST:event_jButton1ActionPerformed
+
+    public void llenarTable(DefaultTableModel table, HashMap<String, Set<String>> hash) {
+        for (int i = 0; i < cabezote.size(); i++) {
+            for (Map.Entry<String, Set<String>> entry : hash.entrySet()) {
+                if (entry.getKey().equals(cabezote.get(i))) {
+                    table.addRow(new Object[]{entry.getKey(), entry.getValue()});
+                    break;
+                }
+            }
+        }
+    }
+
+    private void reconocerButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_reconocerButtonActionPerformed
+        try {
+            
+            String cad = cadena.getText().replaceAll("&", "") + "$";
+            String[] c = String2Vector(cad);
+            Stack<String> pila = new Stack<String>();
+            pila.push("$");
+            pila.push(cabezote.get(0));
+            System.out.println(showStack(pila));
+            System.out.println("La pila es: " + pila);
+            pk3 = new DefaultTableModel();
+            String hp2[] = {"Pila", "Entrada", "Salida"};
+            pk3.setColumnIdentifiers(hp2);
+            TablaReconocer.setModel(pk3);            
+            TablaReconocer.setVisible(true);
+            int sw = 0, i = 0, bad = 0;
+            while (sw == 0 && bad == 0) {
+                System.out.println("el top es: " + pila.peek());
+                if (!esMinuscula(pila.peek())) {
+                    System.out.println("NO ES MINUSCULA " + pila.peek());
+                    String p = buscarProduccion(pila, c[i]);
+                    if (null == p) {
+                        System.out.println("PURAAAAA VIDAAAA");
+                        pk3.addRow(new Object[]{showStack(pila), showVector(c, i), "ERROR"});
+                        bad = 1;
+                    } else {
+                        String[] prod = p.split("->");
+                        prod = String2Vector(prod[1]);
+                        System.out.println("Terminal para buscar " + c[i]);
+                        pk3.addRow(new Object[]{showStack(pila), showVector(c, i), p});
+                        pila.pop();
+                        if (!prod[prod.length - 1].equals("&")) {
+                            for (int k = prod.length - 1; k >= 0; k--) {
+                                pila.push(prod[k]);
+                            }
+                        }
+                        System.out.println(pila);
+                    }
+                } else {
+                    if (pila.peek().equals("$")) {
+                        sw = 1;
+                        pk3.addRow(new Object[]{showStack(pila), showVector(c, i), "ACEPTAR"});
+                    } else {
+                        if (pila.peek().equals(c[i])) {
+                            System.out.println("comparare " + pila.peek() + " con " + c[i]);
+                            pk3.addRow(new Object[]{showStack(pila), showVector(c, i), ""});
+                            pila.pop();
+                            i++;
+                        }
+                    }
+                }
+            }
+            if (bad == 1) {
+                System.out.println("No Reconoce");
+            } else {
+                System.out.println("Reonoce");
+            }
+
+        } catch (Exception e) {
+
+            pk3.addRow(new Object[]{"", "", "ERROR"});
+            System.out.println("error");
+        }
+    }//GEN-LAST:event_reconocerButtonActionPerformed
+    public String showVector(String[] string, int i) {
+        String s = "";
+        for (int j = i; j < string.length; j++) {
+            s = s + string[j];
+        }
+        return s;
+    }
+
+    public String showStack(Stack<String> string) {
+        String s = "";
+        for (String st : string) {
+            s = s + st;
+        }
+        System.out.println(s);
+        return s;
+    }
+
+    public String[] String2Vector(String string) {
+        String[] s = new String[string.length()];
+        for (int i = 0; i < string.toCharArray().length; i++) {
+            s[i] = String.valueOf(string.toCharArray()[i]);
+            System.out.println(s[i]);
+        }
+        return s;
+    }
+
+    public String buscarProduccion(Stack<String> pila, String terminal) {
+        boolean found = false;
+        String S = pila.peek(), prod = null;
+        System.out.println("HELL");
+        for (int i = 0; i < cabezote.size(); i++) {
+            System.out.println(cabezote.get(i) + " comparo con " + S);
+            if (cabezote.get(i).equals(S)) {
+                System.out.println(cabezote.get(i) + " es igual " + S);
+                for (int j = 0; j < terminales.size(); j++) {
+                    if (terminal.equals(terminales.get(j))) {
+                        System.out.println(terminales.get(j) + " comparo con " + terminal);
+                        prod = String.valueOf(pk2.getValueAt(i, j + 1));
+                        System.out.println("la produccion es: " + prod);
+                        found = true;
+                        return prod;
+                    }
+                }
+                break;
+            }
+        }
+        if (found = false) {
+            return null;
+        } else {
+            return prod;
+        }
+
+    }
 
     /**
      * @param args the command line arguments
@@ -706,17 +853,22 @@ public class Vista extends javax.swing.JFrame {
     private javax.swing.JTextField JRuta;
     private javax.swing.JTable TablaMt;
     private javax.swing.JTable TablaPrimero;
+    private javax.swing.JTable TablaReconocer;
     private javax.swing.JTable TablaSiguiente;
+    private javax.swing.JTextField cadena;
     private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel6;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JScrollPane jScrollPane4;
+    private javax.swing.JScrollPane jScrollPane5;
     private javax.swing.JTextArea jTextArea1;
+    private javax.swing.JButton reconocerButton;
     // End of variables declaration//GEN-END:variables
 }
